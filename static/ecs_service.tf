@@ -1,23 +1,33 @@
 # Sets up the service-specific parts of the setup
 
+variable "AdminList" {
+	description = "Steam ids of admins."
+	type        = set(string)
+	default     = []
+}
+
 locals {
-	ComposeCfg = yamldecode(file("${path.module}/local/docker-compose.yml"))
 	ValheimPorts = {
 		Min = 2456
 		Max = 2458
 	}
 	ContainerCfg = {
 		Valheim = {
-			name         = local.ComposeCfg["services"]["valheim"]["container_name"]
-			image        = local.ComposeCfg["services"]["valheim"]["image"]
+			name         = "valheim"
+			image        = "ghcr.io/lloesche/valheim-server"
 			essential    = true
 			cpu          = 2000
 			memory       = 4000
 			environment = [
-				for key, value in local.ComposeCfg["services"]["valheim"]["environment"] : {
-					name  = key,
-					value = value,
-				}
+				# https://github.com/lloesche/valheim-server-docker?msclkid=579e1618cf0e11ecaf755c38b2fade9e#environment-variables
+				{ name = "SERVER_NAME",          value = "Bunnings" },
+				{ name = "SERVER_PORT",          value = string(local.ValheimPorts.Min) },
+				{ name = "ADMINLIST_IDS",        value = join(" ", var.AdminList) },
+				{ name = "WORLD_NAME",           value = "Bunnings" },
+				{ name = "UPDATE_CRON",          value = "@reboot" },
+				{ name = "BACKUPS_IF_IDLE",      value = "false" },
+				{ name = "STATUS_HTTP_PORT",     value = "80" },
+				{ name = "SUPERVISOR_HTTP_PORT", value = "9001" },
 			]
 			portMappings = [
 				for port in range(local.ValheimPorts.Min, local.ValheimPorts.Max + 1) : {
@@ -43,8 +53,8 @@ locals {
 		}
 		# https://github.com/jangrewe/docker-ecs-route53
 		DnsUpdater = {
-			name      = local.ComposeCfg["services"]["dnsupdater"]["container_name"]
-			image     = local.ComposeCfg["services"]["dnsupdater"]["image"]
+			name      = "dnsupdater"
+			image     = "vagalume/route53-updater:latest"
 			essential = false
 			cpu       = 48
 			memory    = 96
