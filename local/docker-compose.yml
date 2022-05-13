@@ -1,0 +1,44 @@
+version: '3.2'
+
+services:
+  
+  valheim:
+    container_name: valheim
+    image: ghcr.io/lloesche/valheim-server
+    cap_add:
+      - SYS_NICE
+    volumes:
+      - ./config:/config
+      - ./data:/opt/valheim
+    ports:
+      - "2456-2457:2456-2457/udp"
+      - "9001:9001/tcp"
+    environment: # TODO: Remove defaults.
+      SERVER_NAME:                   'Bunnings'
+      SERVER_PORT:                   '2456'
+      WORLD_NAME:                    'Bunnings'
+      SERVER_PUBLIC:                 '1'
+      UPDATE_INTERVAL:               '900'
+      BACKUPS_INTERVAL:              '3600'
+      BACKUPS_DIRECTORY:             '/config/backups'
+      BACKUPS_MAX_AGE:               '3'
+      BACKUPS_IF_IDLE:               'false'
+      BACKUPS_DIRECTORY_PERMISSIONS: '755'
+      BACKUPS_FILE_PERMISSIONS:      '644'
+      CONFIG_DIRECTORY_PERMISSIONS:  '755'
+      WORLDS_DIRECTORY_PERMISSIONS:  '755'
+      WORLDS_FILE_PERMISSIONS:       '644'
+      DNS_1:                         '10.0.0.2'
+      DNS_2:                         '10.0.0.2'
+      STEAMCMD_ARGS:                 'validate'
+    restart:           always
+    stop_grace_period: 2m
+    
+  dnsupdater:
+    container_name: dnsupdater
+    image: vagalume/route53-updater:latest
+    environment:
+      AWS_ROUTE53_ZONEID:    aetheric.co.nz
+      AWS_ROUTE53_HOST:      valheim.aetheric.co.nz
+      AWS_ROUTE53_TTL:       3600
+      

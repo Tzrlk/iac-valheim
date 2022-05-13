@@ -1,0 +1,21 @@
+*.log
+
+# IntelliJ
+.idea/
+*.iml
+
+# Terraform
+.terraform/
+*.tfvars
+*.tfstate.backup
+
+# Npm
+node_modules/
+*.tsbuildinfo
+
+# Typescript
+main.js
+main.d.ts
+
+# CDK
+cdktf.out/
