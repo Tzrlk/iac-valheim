@@ -11,6 +11,8 @@ locals {
 		Min = 2456
 		Max = 2458
 	}
+	ValheimStatusPort = 80
+	ValheimSuperPort = 9001
 	ContainerCfg = {
 		Valheim = {
 			name         = "valheim"
@@ -26,18 +28,22 @@ locals {
 				{ name = "BACKUPS_IF_IDLE",      value = "false" },
 				{ name = "BACKUP_CRON",          value = "@hourly" },
 				{ name = "STATUS_HTTP",          value = "true" },
-				{ name = "STATUS_HTTP_PORT",     value = "80" },
+				{ name = "STATUS_HTTP_PORT",     value = tostring(local.ValheimStatusPort) },
 				{ name = "SUPERVISOR_HTTP",      value = "true" },
-				{ name = "SUPERVISOR_HTTP_PORT", value = "9001" },
+				{ name = "SUPERVISOR_HTTP_PORT", value = tostring(local.ValheimSuperPort) },
 				{ name = "ADMINLIST_IDS",        value = join(" ", var.AdminList) },
 			]
-			portMappings = [
-				for port in range(local.ValheimPorts.Min, local.ValheimPorts.Max + 1) : {
-					containerPort = port
-					hostPort      = port
-					protocol      = "tcp"
-				}
-			]
+			portMappings = concat([
+				{ containerPort = local.ValheimStatusPort },
+				{ containerPort = local.ValheimSuperPort },
+			], [
+				for port in range(local.ValheimPorts.Min, local.ValheimPorts.Max + 1) :
+					{ containerPort = port, protocol = "udp" }
+			]),
+			healthCheck = {
+				command     = [ "CMD-SHELL", "/healthcheck.sh" ]
+				startPeriod = 300
+			}
 			secrets = [{
 				name      = "SERVER_PASS"
 				valueFrom = aws_secretsmanager_secret.ServerPass.arn
@@ -45,6 +51,7 @@ locals {
 			volumesFrom = []
 			linuxParameters = {
 				initProcessEnabled = true
+				# Can't add SYS_NICE under fargate.
 			}
 		}
 		# https://github.com/jangrewe/docker-ecs-route53

@@ -26,6 +26,7 @@ resource "aws_iam_role" "ValheimExec" {
 		aws_iam_policy.AmazonECSTaskExecutionRolePolicy.arn,
 		aws_iam_policy.ServerPassAccess.arn,
 		aws_iam_policy.SsmAccess.arn,
+		aws_iam_policy.ValheimS3.arn,
 	]
 	tags = {
 		Cost = "Free"
@@ -39,6 +40,7 @@ resource "aws_iam_role" "ValheimTask" {
 		aws_iam_policy.ZoneRecordControl.arn,
 		aws_iam_policy.ServerPassAccess.arn,
 		aws_iam_policy.SsmAccess.arn,
+		aws_iam_policy.ValheimS3.arn,
 	]
 	tags = {
 		Cost = "Free"

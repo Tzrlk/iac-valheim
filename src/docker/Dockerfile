@@ -36,31 +36,46 @@ ARG S3_URL
 
 # Add S3 backup scripts.
 ARG S3_URL_BAK=${S3_URL}/backups
-ENV POST_BACKUP_HOOK=${HOOKS_DIR}/s3_backup.sh
-COPY <<EOF ${POST_BACKUP_HOOK}
+ENV POST_BACKUP_HOOK=${HOOKS_DIR}/s3_backup.sh \
+	BACKUPS_DIR=/config/backups
+COPY --chmod=755 <<-EOF ${POST_BACKUP_HOOK}
 	#!/usr/bin/env bash
-	# $1 is backup file (/config/backups/worlds-33252352-32423.zip)
-	aws s3 sync "$(dirname "\${1}")" "${S3_URL_BAK}" \\
+	aws s3 sync "${BACKUPS_DIR}" "${S3_URL_BAK}" \\
 			--storage-class ONEZONE_IA
 EOF
 
 ARG S3_URL_CFG=${S3_URL}/worlds
 # Pull-down the last recorded world config
-ENV PRE_BOOTSTRAP_HOOK=${HOOKS_DIR}/s3_load.sh
-COPY --link <<EOF ${PRE_BOOTSTRAP_HOOK}
+ENV PRE_BOOTSTRAP_HOOK=${HOOKS_DIR}/s3_load.sh \
+	WORLDS_DIR=/config/worlds
+COPY --chmod=755 --link <<-EOF ${PRE_BOOTSTRAP_HOOK}
 	#!/usr/bin/env bash
-	mkdir -p /config/worlds \\
+	mkdir -p "${WORLDS_DIR}" \\
 	&& aws s3 sync \\
 			"${S3_URL_CFG}" \\
-			/config/worlds/
+			"${WORLDS_DIR}"
 EOF
 # Upload the final state of the world before ending.
 ENV POST_SHUTDOWN_HOOK=${HOOKS_DIR}/s3_save.sh
-COPY --link <<EOF ${POST_SHUTDOWN_HOOK}
+COPY --chmod=755 --link <<-EOF ${POST_SHUTDOWN_HOOK}
 	#!/usr/bin/env bash
 	aws s3 sync \\
-			/config/worlds/ \\
+			"${WORLDS_DIR}" \\
 			"${S3_URL_CFG}"
+EOF
+
+COPY --chmod=755 --link <<-EOF /healthcheck.sh
+	#!/usr/bin/env bash
+	if status="$(curl -sSL http://localhost:\${STATUS_HTTP}/)"; then
+		echo "\${status}" | jq -e && exit 0
+
+	elif [ -f /opt/valheim/htdocs/status.json ]
+		cat /opt/valheim/htdocs/status.json | jq -e
+
+	else
+		echo "No status information available!"
+	fi
+	exit 1
 EOF
 
 ENV UPDATE_CRON="@yearly"
