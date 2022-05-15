@@ -5,9 +5,8 @@ resource "aws_s3_bucket" "Valheim" {
 	lifecycle {
 		prevent_destroy = true
 	}
-	
+
 	bucket_prefix  = "valheim-"
-	hosted_zone_id = aws_subnet.Subnet.availability_zone_id
 }
 resource "aws_s3_bucket_acl" "Valheim" {
 	bucket = aws_s3_bucket.Valheim.id
@@ -30,10 +29,6 @@ resource "aws_s3_bucket_lifecycle_configuration" "Valheim" {
 		abort_incomplete_multipart_upload {
 			days_after_initiation = 1
 		}
-		transition {
-			days          = 30
-			storage_class = "ONEZONE_IA"
-		}
 		noncurrent_version_expiration {
 			noncurrent_days           = 30
 			newer_noncurrent_versions = 5
@@ -49,7 +44,8 @@ data "aws_iam_policy_document" "ValheimS3"  {
 			"s3:ListBucket",
 			"s3:LocateBucket",
 			"s3:DescribeBucket",
-			"s3:AbortMultipartUpload",
+			"s3:GetBucketLocation",
+			"s3:ListBucketMultipartUploads"
 		]
 	}
 	statement {
@@ -61,6 +57,10 @@ data "aws_iam_policy_document" "ValheimS3"  {
 			"s3:PutObjectAcl",
 			"s3:DeleteObject",
 			"s3:DeleteObjectAcl",
+			"s3:GetObjectTagging",
+			"s3:PutObjectTagging",
+			"s3:AbortMultipartUpload",
+			"s3:ListMultipartUploadParts",
 		]
 	}
 }

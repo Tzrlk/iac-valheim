@@ -5,19 +5,21 @@ import {
 	AwsProvider,
 } from '@cdktf/provider-aws';
 
-export class IacValheim extends TerraformStack {
-	constructor(scope: Construct, stackId: string) {
-		super(scope, stackId);
+export function buildValheimEcs(app: App): TerraformStack {
+	return new TerraformStack(app, 'valheim-ecs').also((stack) => {
+		
+	})
+}
+
+export class ValheimEcs extends TerraformStack {
+	constructor(scope: Construct) {
+		super(scope, 'valheim-ecs');
 
 		new AwsProvider(this, 'aws', {
 			region: 'ap-southeast-2',
 		});
 
 		new DataAwsRegion(this, 'region');
-		
+
 	}
 }
-
-const app = new App();
-new IacValheim(app, 'iac-valheim');
-app.synth();

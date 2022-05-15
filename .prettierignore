@@ -1,5 +1,5 @@
 .idea/
 bin/
-local/
+src/docker/
 node_modules/
 static/

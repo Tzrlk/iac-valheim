@@ -25,7 +25,6 @@ resource "aws_iam_role" "ValheimExec" {
 	managed_policy_arns = [
 		aws_iam_policy.AmazonECSTaskExecutionRolePolicy.arn,
 		aws_iam_policy.ServerPassAccess.arn,
-		aws_iam_policy.ValheimEfs.arn,
 		aws_iam_policy.SsmAccess.arn,
 	]
 	tags = {
@@ -39,7 +38,6 @@ resource "aws_iam_role" "ValheimTask" {
 	managed_policy_arns = [
 		aws_iam_policy.ZoneRecordControl.arn,
 		aws_iam_policy.ServerPassAccess.arn,
-		aws_iam_policy.ValheimEfs.arn,
 		aws_iam_policy.SsmAccess.arn,
 	]
 	tags = {

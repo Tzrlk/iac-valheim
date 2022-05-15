@@ -1,23 +1,43 @@
 #!/usr/bin/env make
 
 .PHONY: \
-	apply
+	apply \
+	exec
 
-TF_SOURCES := $(wildcard *.tf)
-TF_CONFIG := $(wildcard *.tfvars)
+TF_DIR     := src/terraform
+TF_SOURCES := $(wildcard src/terraform/*.tf)
+TF_CONFIGS := $(wildcard src/terraform/*.tfvars)
 
-apply: \
-	.terraform.tfstate
+apply: ${TF_DIR}/.terraform.tfstate
 
-.terraform.tfstate: \
+${TF_DIR}/.terraform.tfstate: \
 		${TF_SOURCES} \
-		${TF_CONFIG}
+		${TF_CONFIGS} \
+		${TF_DIR}/.terraform.lock.hcl
+	cd ${TF_DIR} && \
 	terraform apply
 
-.terraform.tfstate.backup: \
+${TF_DIR}/.terraform.tfstate.backup: \
 		.terraform.tfstate
 
-.terraform.lock.hcl: \
-		_main.tf # provider config
+${TF_DIR}/.terraform.lock.hcl: \
+		src/terraform/_main.tf # provider config
+	cd ${TF_DIR} && \
 	terraform init \
 		--upgrade
+
+exec:
+	sh bin/exec.sh
+
+docker: \
+	src/docker/Dockerfile
+	docker build \
+		--tag tzrlk/valheim-server:latest \ 
+		src/docker/
+
+ecr:
+	aws ecr get-login-password \
+	| docker login \
+			--username AWS \
+			--password-stdin \
+			${DOCKER_REGISTRY}

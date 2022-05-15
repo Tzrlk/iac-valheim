@@ -14,8 +14,8 @@ node_modules/
 *.tsbuildinfo
 
 # Typescript
-main.js
-main.d.ts
+src/**/*.js
+src/**/*.d.ts
 
 # CDK
 cdktf.out/

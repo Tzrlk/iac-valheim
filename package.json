@@ -4,7 +4,7 @@
 	"description": "Sets up a valheim server in ECS.",
 	"license": "MIT",
 	"author": "Peter Cummuskey",
-	"main": "index.js",
+	"main": "src/cdktf/main.ts",
 	"scripts": {
 		"build": "tsc",
 		"compile": "tsc --pretty",
@@ -21,6 +21,7 @@
 	"dependencies": {
 		"@cdktf/provider-aws": "^0.0.111",
 		"cdktf": "^0.10.4",
-		"constructs": "^10.1.7"
+		"constructs": "^10.1.7",
+		"scope-extensions-js": "^1.1.0"
 	}
 }
