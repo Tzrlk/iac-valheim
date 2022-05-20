@@ -6,6 +6,10 @@ variable "AdminList" {
 	default     = []
 }
 
+data "docker_image" "Valheim" {
+	name = "tzrlk/valheim-server"
+}
+
 locals {
 	ValheimPorts = {
 		Min = 2456
@@ -16,7 +20,7 @@ locals {
 	ContainerCfg = {
 		Valheim = {
 			name         = "valheim"
-			image        = "tzrlk/valheim-server"
+			image        = data.docker_image.Valheim.repo_digest
 			essential    = true
 			cpu          = 2000
 			memory       = 4000
@@ -93,11 +97,13 @@ resource "aws_ecs_task_definition" "Valheim" {
 		Cost = "Free"
 	}
 }
-resource "aws_ecs_service" "Valheim" {
-	lifecycle {
-		ignore_changes = [ desired_count ]
-	}
 
+variable "RunServer" {
+	description = "Whether or not to run the server."
+	type        = bool
+	default     = false
+}
+resource "aws_ecs_service" "Valheim" {
 	name            = "valheim"
 	cluster         = aws_ecs_cluster.Valheim.id
 	task_definition = aws_ecs_task_definition.Valheim.id
@@ -106,7 +112,7 @@ resource "aws_ecs_service" "Valheim" {
 	enable_execute_command = true
 	force_new_deployment   = true
 
-	desired_count                      = 1
+	desired_count                      = var.RunServer ? 1 : 0
 	deployment_minimum_healthy_percent = 0
 	deployment_maximum_percent         = 100
 

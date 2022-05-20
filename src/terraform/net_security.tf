@@ -8,6 +8,14 @@ resource "aws_security_group" "Cluster" {
 	}
 }
 
+resource "aws_security_group_rule" "AnywhereToClusterHttp" {
+	security_group_id = aws_security_group.Cluster.id
+	cidr_blocks       = [ "0.0.0.0/0" ]
+	type              = "ingress"
+	protocol          = "tcp"
+	to_port           = 80
+	from_port         = 80
+}
 resource "aws_security_group_rule" "AnywhereToClusterValheim" {
 	security_group_id = aws_security_group.Cluster.id
 	cidr_blocks       = [ "0.0.0.0/0" ]
@@ -16,7 +24,7 @@ resource "aws_security_group_rule" "AnywhereToClusterValheim" {
 	from_port         = local.ValheimPorts.Min
 	to_port           = local.ValheimPorts.Max
 }
-resource "aws_security_group_rule" "ClusterValheimToAnywhere" {
+resource "aws_security_group_rule" "ClusterToAnywhereHttps" {
 	security_group_id = aws_security_group.Cluster.id
 	cidr_blocks       = [ "0.0.0.0/0" ]
 	type              = "egress"
@@ -33,6 +41,14 @@ resource "aws_network_acl" "Firewall" {
 		protocol   = "udp"
 		from_port  = local.ValheimPorts.Min
 		to_port    = local.ValheimPorts.Max
+		cidr_block = "0.0.0.0/0"
+		action     = "allow"
+	}
+	ingress { # valheim status
+		rule_no    = 20
+		protocol   = "tcp"
+		from_port  = 80
+		to_port    = 80
 		cidr_block = "0.0.0.0/0"
 		action     = "allow"
 	}

@@ -31,51 +31,33 @@ RUN --mount=type=cache,id=val,target=/opt/valheim/dl/server \
 	env POST_UPDATE_CHECK_HOOK=shutdown \
 		/usr/local/bin/valheim-updater
 
-ARG HOOKS_DIR=/usr/local/share/valheim/contrib
-ARG S3_URL
-
-# Add S3 backup scripts.
-ARG S3_URL_BAK=${S3_URL}/backups
-ENV POST_BACKUP_HOOK=${HOOKS_DIR}/s3_backup.sh \
-	BACKUPS_DIR=/config/backups
-COPY --chmod=755 <<-EOF ${POST_BACKUP_HOOK}
-	#!/usr/bin/env bash
-	aws s3 sync "${BACKUPS_DIR}" "${S3_URL_BAK}" \\
-			--storage-class ONEZONE_IA
-EOF
-
-ARG S3_URL_CFG=${S3_URL}/worlds
-# Pull-down the last recorded world config
-ENV PRE_BOOTSTRAP_HOOK=${HOOKS_DIR}/s3_load.sh \
+ENV \
+	BACKUPS_DIR=/config/backups \
 	WORLDS_DIR=/config/worlds
-COPY --chmod=755 --link <<-EOF ${PRE_BOOTSTRAP_HOOK}
-	#!/usr/bin/env bash
-	mkdir -p "${WORLDS_DIR}" \\
-	&& aws s3 sync \\
-			"${S3_URL_CFG}" \\
-			"${WORLDS_DIR}"
-EOF
-# Upload the final state of the world before ending.
-ENV POST_SHUTDOWN_HOOK=${HOOKS_DIR}/s3_save.sh
-COPY --chmod=755 --link <<-EOF ${POST_SHUTDOWN_HOOK}
-	#!/usr/bin/env bash
-	aws s3 sync \\
-			"${WORLDS_DIR}" \\
-			"${S3_URL_CFG}"
-EOF
 
-COPY --chmod=755 --link <<-EOF /healthcheck.sh
-	#!/usr/bin/env bash
-	if status="$(curl -sSL http://localhost:\${STATUS_HTTP}/)"; then
-		echo "\${status}" | jq -e && exit 0
+ARG S3_URL
+ENV \
+	S3_URL_BAK=${S3_URL}/backups \
+	S3_URL_CFG=${S3_URL}/worlds
 
-	elif [ -f /opt/valheim/htdocs/status.json ]
-		cat /opt/valheim/htdocs/status.json | jq -e
+ARG HOOKS_DIR=/usr/local/share/valheim/contrib
+ENV \
+	POST_BACKUP_HOOK=${HOOKS_DIR}/s3_backup.sh \
+	PRE_BOOTSTRAP_HOOK=${HOOKS_DIR}/s3_load.sh \
+	POST_SHUTDOWN_HOOK=${HOOKS_DIR}/s3_save.sh
 
-	else
-		echo "No status information available!"
-	fi
-	exit 1
-EOF
+COPY --chmod=755 --link \
+	bin/s3_backup.sh \
+	bin/s3_load.sh \
+	bin/s3_save.sh \
+	${HOOKS_DIR}/
 
-ENV UPDATE_CRON="@yearly"
+COPY --chmod=755 --link \
+	bin/healthcheck.sh \
+	/
+HEALTHCHECK --start-period=120s \
+	CMD /healthcheck.sh
+
+ENV \
+	UPDATE_CRON="@yearly" \
+	STATUS_HTTP="true"

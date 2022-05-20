@@ -7,7 +7,7 @@
 # Terraform
 .terraform/
 *.tfvars
-*.tfstate.backup
+*.backup
 
 # Npm
 node_modules/
@@ -16,6 +16,7 @@ node_modules/
 # Typescript
 src/**/*.js
 src/**/*.d.ts
+src/**/imported.ts
 
 # CDK
 cdktf.out/
