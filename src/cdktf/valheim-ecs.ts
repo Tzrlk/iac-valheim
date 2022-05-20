@@ -1,18 +1,11 @@
-import { Construct } from 'constructs';
 import { App, TerraformStack } from 'cdktf';
 import {
 	DataAwsRegion,
 	AwsProvider,
 } from '@cdktf/provider-aws';
 
-export function buildValheimEcs(app: App): TerraformStack {
-	return new TerraformStack(app, 'valheim-ecs').also((stack) => {
-		
-	})
-}
-
 export class ValheimEcs extends TerraformStack {
-	constructor(scope: Construct) {
+	constructor(scope: App) {
 		super(scope, 'valheim-ecs');
 
 		new AwsProvider(this, 'aws', {

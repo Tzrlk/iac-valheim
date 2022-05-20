@@ -1,11 +1,14 @@
+/**
+ * Notes:
+ * | returns | argument | context |
+ * | ------: | :------: | :-----: |
+ * |  result |   let    |   run   |
+ * |    this |   also   |  apply  |
+ */
 import { App } from 'cdktf'
-import {  } from './valheim-ecs'
+import { ValheimEcs } from './valheim-ecs'
 import 'scope-extensions-js'
 
-//	                it argument	this context
-//	Returns result	let			run
-//	Returns this	also		apply
-
 new App()
-		.also(app => )
+		.also(app => new ValheimEcs(app))
 		.synth()
