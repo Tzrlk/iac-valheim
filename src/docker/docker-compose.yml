@@ -7,15 +7,17 @@ services:
     image: tzrlk/valheim-server
     build:
       context: .
+      args:
+        DATE:   220523-2
+        S3_URL: s3://valheim-20220510082545633500000001
     cap_add:
       - SYS_NICE
     volumes:
-      - ./config:/config
-      - ./data:/opt/valheim
+      - '~/.aws/:/root/.aws:ro'
     ports:
       - "2456-2457:2456-2457/udp" # valheim
       - "9001:9001/tcp" # admin
-      - "80:80/tcp" # status
+      - "8080:8080/tcp" # status
     environment:
       SERVER_NAME:     'Bunnings'
       SERVER_PORT:     '2456'
@@ -29,7 +31,10 @@ services:
     container_name: dnsupdater
     image: vagalume/route53-updater:latest
     environment:
-      AWS_ROUTE53_ZONEID:    aetheric.co.nz
-      AWS_ROUTE53_HOST:      valheim.aetheric.co.nz
-      AWS_ROUTE53_TTL:       3600
+      AWS_ROUTE53_ZONEID: /hostedzone/Z0545113O9771MXS32DK
+      AWS_ROUTE53_HOST:   valheim.aetheric.co.nz
+      AWS_ROUTE53_TTL:    3600
+      IP_PROVIDER:        ifconfig.me
+    volumes:
+      - '~/.aws/:/root/.aws:ro'
       

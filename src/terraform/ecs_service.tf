@@ -69,6 +69,7 @@ locals {
 				{ name = "AWS_ROUTE53_ZONEID", value = aws_route53_zone.Aetheric.zone_id },
 				{ name = "AWS_ROUTE53_HOST",   value = "valheim.aetheric.co.nz" },
 				{ name = "AWS_ROUTE53_TTL",    value = "3600" },
+				{ name = "IP_PROVIDER",        value = "ifconfig.me" },
 			]
 			portMappings = []
 			mountPoints  = []
