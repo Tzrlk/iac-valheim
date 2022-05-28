@@ -6,7 +6,7 @@ status="$(
 	|| cat /opt/valheim/htdocs/status.json
 )"
 
-error="$(echo "${status}" | jq '.error | select(. != null)')"
+error="$(echo "${status}" | jq -r '.error | select(. != null)')"
 if [ -n "${error}" ]; then
 	echo "${error}"
 	exit 1
