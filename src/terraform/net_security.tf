@@ -88,6 +88,14 @@ resource "aws_security_group_rule" "ClusterToAnywhereHttps" {
 	from_port         = 443
 	to_port           = 443
 }
+resource "aws_security_group_rule" "ClusterToAnywhereValheimUdp" {
+	security_group_id = aws_security_group.Cluster.id
+	cidr_blocks       = [ "0.0.0.0/0" ]
+	type              = "egress"
+	protocol          = "udp"
+	from_port         = local.ValheimPorts.Min
+	to_port           = local.ValheimPorts.Max
+}
 
 resource "aws_network_acl" "Firewall" {
 	vpc_id     = aws_vpc.Vpc.id

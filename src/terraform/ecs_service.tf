@@ -38,20 +38,24 @@ locals {
 				{ name = "ADMINLIST_IDS",        value = join(" ", var.AdminList) },
 			]
 			portMappings = concat([
-				{ containerPort = local.ValheimStatusPort },
-				{ containerPort = local.ValheimSuperPort },
+				{ hostPort = local.ValheimStatusPort, containerPort = local.ValheimStatusPort, protocol = "tcp" },
+				{ hostPort = local.ValheimSuperPort,  containerPort = local.ValheimSuperPort,  protocol = "tcp" },
 			], [
 				for port in range(local.ValheimPorts.Min, local.ValheimPorts.Max + 1) :
-					{ containerPort = port, protocol = "udp" }
+					{ hostPort = port, containerPort = port, protocol = "udp" }
 			]),
 			healthCheck = {
 				command     = [ "CMD-SHELL", "/healthcheck.sh" ]
+				interval    = 30
+				retries     = 3
+				timeout     = 5
 				startPeriod = 300
 			}
 			secrets = [{
 				name      = "SERVER_PASS"
 				valueFrom = aws_secretsmanager_secret.ServerPass.arn
 			}]
+			mountPoints = []
 			volumesFrom = []
 			linuxParameters = {
 				initProcessEnabled = true
@@ -66,10 +70,7 @@ locals {
 			cpu       = 48
 			memory    = 96
 			environment = [
-				{ name = "AWS_ROUTE53_ZONEID", value = aws_route53_zone.Aetheric.zone_id },
-				{ name = "AWS_ROUTE53_HOST",   value = "valheim.aetheric.co.nz" },
-				{ name = "AWS_ROUTE53_TTL",    value = "3600" },
-				{ name = "IP_PROVIDER",        value = "ifconfig.me" },
+				{ name = "IP_PROVIDER", value = "ifconfig.me" },
 			]
 			portMappings = []
 			mountPoints  = []
