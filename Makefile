@@ -48,11 +48,20 @@ CONTAINER := valheim
 .make/: ; mkdir -p ${@}
 .make/task/: | .make/ ; mkdir -p ${@}
 
+.make/task/svc_arn.txt: | .make/task/
+	@echo >&2 "> Checking for current service arn."
+	aws ecs list-services --cluster "${CLUSTER}" \
+		| jq -re '.serviceArns | first | select(length>0)' \
+		> ${@}
+
 .make/task/arn.txt: .ALWAYS | .make/task/
 	@echo >&2 "> Checking for current task arn." 
 	@arn="$$(aws ecs list-tasks --cluster "${CLUSTER}" \
 		| jq -re '.taskArns | first | select(length>0)')"
-	@if [ "$${arn}" != "$(strip $(file < ${@}))" ]; then \
+	@if [ -z "$${arn}" ]; then
+		echo >&2 "> Task isn't running."; \
+		exit 1; \
+	elif [ "$${arn}" != "$(strip $(file < ${@}))" ]; then \
 		echo >&2 "> Task ARN has changed to '$${arn}'."; \
 		echo -n "$${arn}" > ${@}; \
 	fi
@@ -118,3 +127,18 @@ test: .make/task/public_ip.txt
 	@echo >&2 "> Checking geekstrom api for Valheim response."
 	@echo -e "2456: $$(curl "https://geekstrom.de/valheim/check/api.php?host=$(file < ${<})&port=2456")"
 	@echo -e "2457: $$(curl "https://geekstrom.de/valheim/check/api.php?host=$(file < ${<})&port=2457")"
+
+server-up: .make/task/svc_arn.txt
+	@aws ecs update-service \
+			--cluster "${CLUSTER}" \
+			--service "$(file < ${<})" \
+			--desired-count 1 \
+			--force-new-deployment \
+		| jq '.service.deployments'
+
+server-down: .make/task/svc_arn.txt
+	@aws ecs update-service \
+			--cluster "${CLUSTER}" \
+			--service "$(file < ${<})" \
+			--desired-count 0 \
+		| jq '.service.deployments'

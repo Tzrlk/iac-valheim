@@ -5,6 +5,11 @@ variable "AdminList" {
 	type        = set(string)
 	default     = []
 }
+variable "DynDnsPass" {
+	description = "Password for the chosen dynamic dns service."
+	type        = string
+	sensitive   = true
+}
 
 data "docker_image" "Valheim" {
 	name = "tzrlk/valheim-server"
@@ -12,18 +17,32 @@ data "docker_image" "Valheim" {
 
 locals {
 	ValheimPorts = {
-		Min = 2456
-		Max = 2458
+		Min    = 2456
+		Max    = 2458
+		Status = 80
+		Super  = 9001
+		Ddns   = 9002
 	}
-	ValheimStatusPort = 80
-	ValheimSuperPort = 9001
+	TaskResFactors = {
+		Cpu = 2
+		Mem = 6
+	}
+	DnsUpdaterConfig = {
+		settings = [{
+			provider    = "freedns"
+			domain      = "jumpingcrab.com"
+			host        = "vikongs"
+			token       = "2tuXUBhXKexACEfMZKKBjuy8"
+			ip_version  = "ipv4"
+		}]
+	}
 	ContainerCfg = {
 		Valheim = {
 			name         = "valheim"
 			image        = data.docker_image.Valheim.repo_digest
 			essential    = true
-			cpu          = 2000
-			memory       = 4000
+			cpu          = 1000 * local.TaskResFactors.Cpu
+			memory       = 1000 * local.TaskResFactors.Mem
 			environment = [
 				# https://github.com/lloesche/valheim-server-docker?msclkid=579e1618cf0e11ecaf755c38b2fade9e#environment-variables
 				{ name = "SERVER_NAME",          value = "Bunnings" },
@@ -32,17 +51,26 @@ locals {
 				{ name = "BACKUPS_IF_IDLE",      value = "false" },
 				{ name = "BACKUP_CRON",          value = "@hourly" },
 				{ name = "STATUS_HTTP",          value = "true" },
-				{ name = "STATUS_HTTP_PORT",     value = tostring(local.ValheimStatusPort) },
+				{ name = "STATUS_HTTP_PORT",     value = tostring(local.ValheimPorts.Status) },
 				{ name = "SUPERVISOR_HTTP",      value = "true" },
-				{ name = "SUPERVISOR_HTTP_PORT", value = tostring(local.ValheimSuperPort) },
+				{ name = "SUPERVISOR_HTTP_PORT", value = tostring(local.ValheimPorts.Super) },
 				{ name = "ADMINLIST_IDS",        value = join(" ", var.AdminList) },
+				{ name = "DNS_1",                value = "10.0.0.2" },
+				{ name = "DNS_2",                value = "10.0.0.2" },
+				{ name = "TZ",                   value = "Pacific/Auckland" },
 			]
 			portMappings = concat([
-				{ hostPort = local.ValheimStatusPort, containerPort = local.ValheimStatusPort, protocol = "tcp" },
-				{ hostPort = local.ValheimSuperPort,  containerPort = local.ValheimSuperPort,  protocol = "tcp" },
+				for port in [ local.ValheimPorts.Status, local.ValheimPorts.Super ] : {
+					hostPort = port
+					containerPort = port
+					protocol = "tcp"
+				}
 			], [
-				for port in range(local.ValheimPorts.Min, local.ValheimPorts.Max + 1) :
-					{ hostPort = port, containerPort = port, protocol = "udp" }
+				for port in range(local.ValheimPorts.Min, local.ValheimPorts.Max + 1) : {
+					hostPort = port
+					containerPort = port
+					protocol = "udp"
+				}
 			]),
 			healthCheck = {
 				command     = [ "CMD-SHELL", "/healthcheck.sh" ]
@@ -62,21 +90,34 @@ locals {
 				# Can't add SYS_NICE under fargate.
 			}
 		}
-		# https://github.com/jangrewe/docker-ecs-route53
+		# https://hub.docker.com/r/qmcgaw/ddns-updater
 		DnsUpdater = {
 			name      = "dnsupdater"
-			image     = "vagalume/route53-updater:latest"
+			image     = "qmcgaw/ddns-updater:latest"
 			essential = false
-			cpu       = 48
-			memory    = 96
+			cpu       = 24 * local.TaskResFactors.Cpu
+			memory    = 24 * local.TaskResFactors.Mem
 			environment = [
-				{ name = "IP_PROVIDER", value = "ifconfig.me" },
+				{ name = "CONFIG",         value = jsonencode(local.DnsUpdaterConfig) },
+				{ name = "LISTENING_PORT", value = tostring(local.ValheimPorts.Ddns) },
+				{ name = "TZ",             value = "Pacific/Auckland" },
 			]
-			portMappings = []
+			portMappings = [{
+				hostPort      = local.ValheimPorts.Ddns
+				containerPort = local.ValheimPorts.Ddns
+				protocol      = "tcp"
+			}]
 			mountPoints  = []
 			volumesFrom  = []
 			linuxParameters = {
 				initProcessEnabled = true
+			}
+			healthCheck = {
+				command     = [ "CMD-SHELL", "curl -f http://localhost:9999" ]
+				interval    = 30
+				retries     = 3
+				timeout     = 5
+				startPeriod = 300
 			}
 		}
 	}
@@ -106,6 +147,10 @@ variable "RunServer" {
 	default     = false
 }
 resource "aws_ecs_service" "Valheim" {
+	lifecycle {
+		ignore_changes = [ desired_count ]
+	}
+
 	name            = "valheim"
 	cluster         = aws_ecs_cluster.Valheim.id
 	task_definition = aws_ecs_task_definition.Valheim.id

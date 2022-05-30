@@ -6,7 +6,11 @@ terraform {
 		}
 		docker = {
 			source  = "kreuzwerker/docker"
-			version = "2.16.0"
+			version = "~> 2.16"
+		}
+		http = {
+			source = "hashicorp/http"
+			version = "~> 2.1"
 		}
 	}
 }

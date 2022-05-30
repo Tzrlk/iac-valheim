@@ -8,13 +8,36 @@ resource "aws_security_group" "Cluster" {
 	}
 }
 
-resource "aws_security_group_rule" "AnywhereToClusterHttp" {
+data "http" "ExternalIp" {
+	url = "https://ifconfig.me"
+}
+locals {
+	ExternalIp = trimspace(data.http.ExternalIp.body)
+}
+
+resource "aws_security_group_rule" "AnywhereToClusterStatus" {
 	security_group_id = aws_security_group.Cluster.id
 	cidr_blocks       = [ "0.0.0.0/0" ]
 	type              = "ingress"
 	protocol          = "tcp"
-	to_port           = 80
-	from_port         = 80
+	to_port           = local.ValheimPorts.Status
+	from_port         = local.ValheimPorts.Status
+}
+resource "aws_security_group_rule" "AnywhereToClusterSuper" {
+	security_group_id = aws_security_group.Cluster.id
+	cidr_blocks       = [ "${local.ExternalIp}/32" ]
+	type              = "ingress"
+	protocol          = "tcp"
+	to_port           = local.ValheimPorts.Super
+	from_port         = local.ValheimPorts.Super
+}
+resource "aws_security_group_rule" "AnywhereToClusterDdns" {
+	security_group_id = aws_security_group.Cluster.id
+	cidr_blocks       = [ "${local.ExternalIp}/32" ]
+	type              = "ingress"
+	protocol          = "tcp"
+	to_port           = local.ValheimPorts.Ddns
+	from_port         = local.ValheimPorts.Ddns
 }
 resource "aws_security_group_rule" "AnywhereToClusterHttps" {
 	security_group_id = aws_security_group.Cluster.id
@@ -119,8 +142,8 @@ resource "aws_network_acl" "Firewall" {
 	ingress { # valheim status
 		rule_no    = 20
 		protocol   = "tcp"
-		from_port  = 80
-		to_port    = 80
+		from_port  = local.ValheimPorts.Status
+		to_port    = local.ValheimPorts.Status
 		cidr_block = "0.0.0.0/0"
 		action     = "allow"
 	}
