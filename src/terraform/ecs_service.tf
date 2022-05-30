@@ -71,7 +71,15 @@ locals {
 					containerPort = port
 					protocol = "udp"
 				}
-			]),
+			])
+			logConfiguration = {
+				logDriver = "awslogs",
+				options = {
+					awslogs-group:         aws_cloudwatch_log_group.ValheimLogs.name
+					awslogs-region:        "ap-southeast-2"
+					awslogs-stream-prefix: "server"
+				}
+			}
 			healthCheck = {
 				command     = [ "CMD-SHELL", "/healthcheck.sh" ]
 				interval    = 30
@@ -119,23 +127,34 @@ locals {
 				timeout     = 5
 				startPeriod = 300
 			}
+			logConfiguration = {
+				logDriver = "awslogs",
+				options = {
+					awslogs-group:         aws_cloudwatch_log_group.ValheimLogs.name
+					awslogs-region:        "ap-southeast-2"
+					awslogs-stream-prefix: "ddns"
+				}
+			}
 		}
 	}
 }
 
 resource "aws_ecs_task_definition" "Valheim" {
+	requires_compatibilities = [ "FARGATE" ]
+	network_mode             = "awsvpc"
+
+	execution_role_arn = aws_iam_role.ValheimTask.arn
+	task_role_arn      = aws_iam_role.ValheimExec.arn
+
+	cpu    = sum(values(local.ContainerCfg)[*]["cpu"])
+	memory = sum(values(local.ContainerCfg)[*]["memory"])
+
 	family                = "valheim"
 	container_definitions = jsonencode([
 		local.ContainerCfg.Valheim,
 		local.ContainerCfg.DnsUpdater,
 	])
-	requires_compatibilities = [ "FARGATE" ]
 
-	execution_role_arn = aws_iam_role.ValheimTask.arn
-	task_role_arn      = aws_iam_role.ValheimExec.arn
-	cpu                = sum(values(local.ContainerCfg)[*]["cpu"])
-	memory             = sum(values(local.ContainerCfg)[*]["memory"])
-	network_mode       = "awsvpc"
 	tags = {
 		Cost = "Free"
 	}
