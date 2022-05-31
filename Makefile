@@ -1,10 +1,27 @@
 #!/usr/bin/env make
 
 .ONESHELL:
+.DELETE_ON_ERROR:
 .ALWAYS:
+.SECONDARY: \
+	.make/task/svc_arn.txt \
+	.make/task/arn.txt \
+	.make/task/desc.json \
+	.make/task/eni.json \
+	.make/task/status.json
+.INTERMEDIATE: \
+	.make/task/eni.txt \
+	.make/task/public_ip.txt \
+	.make/task/public_dns.txt
 .PHONY: \
 	apply \
-	exec
+	exec \
+	addr \
+	status \
+	exec \
+	test \
+	server-up \
+	server-down
 
 TF_DIR     := src/terraform
 TF_SOURCES := $(wildcard src/terraform/*.tf)
@@ -100,9 +117,9 @@ CONTAINER := valheim
 		| jq -er '.Association.PublicDnsName' \
 		> ${@}
 
-.make/task/status.json: .make/task/public_ip.txt
+.make/task/status.json: .make/task/public_ip.txt .ALWAYS
 	@echo >&2 "> Fetching server status."
-	@curl "http://$(file < ${<})/status.json" \
+	@curl -s "http://$(file < ${<})/status.json" \
 		| jq \
 		> ${@}
 
@@ -125,8 +142,8 @@ exec: .make/task/arn.txt
 
 test: .make/task/public_ip.txt
 	@echo >&2 "> Checking geekstrom api for Valheim response."
-	@echo -e "2456: $$(curl "https://geekstrom.de/valheim/check/api.php?host=$(file < ${<})&port=2456")"
-	@echo -e "2457: $$(curl "https://geekstrom.de/valheim/check/api.php?host=$(file < ${<})&port=2457")"
+	@echo -e "2456: $$(curl -s "https://geekstrom.de/valheim/check/api.php?host=$(file < ${<})&port=2456")"
+	@echo -e "2457: $$(curl -s "https://geekstrom.de/valheim/check/api.php?host=$(file < ${<})&port=2457")"
 
 server-up: .make/task/svc_arn.txt
 	@aws ecs update-service \
