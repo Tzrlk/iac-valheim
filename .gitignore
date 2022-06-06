@@ -20,6 +20,7 @@ src/**/imported.ts
 
 # CDK
 cdktf.out/
+.gen/
 
 # Make
 .make/

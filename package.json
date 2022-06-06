@@ -8,6 +8,7 @@
 	"scripts": {
 		"build": "tsc",
 		"compile": "tsc --pretty",
+		"gen": "cdktf get",
 		"synth": "cdktf synth"
 	},
 	"devDependencies": {
@@ -19,7 +20,6 @@
 		"typescript": "^3.9.10"
 	},
 	"dependencies": {
-		"@cdktf/provider-aws": "^0.0.111",
 		"cdktf": "^0.10.4",
 		"constructs": "^10.1.7",
 		"scope-extensions-js": "^1.1.0"

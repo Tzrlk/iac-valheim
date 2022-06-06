@@ -1,5 +1,23 @@
 {
   "language": "typescript",
   "app": "npx ts-node src/cdktf/main.ts",
-  "projectId": "3d344eaa-1872-4da2-8b72-49eba0b34b64"
+  "terraformProviders": [
+    {
+      "name": "aws",
+      "source": "hashicorp/aws",
+      "version": "~> 4.6.0"
+    },
+    {
+      "name": "docker",
+      "source": "kreuzwerker/docker",
+      "version": "~> 2.16.0"
+    }
+  ],
+  "terraformModules": [
+    {
+      "name": "iac-valheim-tf",
+      "source": "./src/terraform"
+    }
+  ],
+  "projectId": "3ca7260b-8996-4960-a7f5-c789e0df7d91"
 }
