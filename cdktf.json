@@ -1,23 +1,15 @@
 {
   "language": "typescript",
-  "app": "npx ts-node src/cdktf/main.ts",
+  "app": "npx ts-node main.ts",
+  "projectId": "3ca7260b-8996-4960-a7f5-c789e0df7d91",
+  "output": ".build/cdktf",
+  "codeMakerOutput": ".build/cdktf",
   "terraformProviders": [
-    {
-      "name": "aws",
-      "source": "hashicorp/aws",
-      "version": "~> 4.6.0"
-    },
-    {
-      "name": "docker",
-      "source": "kreuzwerker/docker",
-      "version": "~> 2.16.0"
-    }
+    "hashicorp/aws@~> 4.6",
+    "kreuzwerker/docker@~> 2.16",
+    "hashicorp/http@~> 2.1"
   ],
-  "terraformModules": [
-    {
-      "name": "iac-valheim-tf",
-      "source": "./src/terraform"
-    }
-  ],
-  "projectId": "3ca7260b-8996-4960-a7f5-c789e0df7d91"
+  "context": {
+    "excludeStackIdFromLogicalIds": "true"
+  }
 }

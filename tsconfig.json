@@ -1,4 +1,10 @@
 {
+	"include": [
+		"**/*.ts"
+	],
+	"exclude": [
+		"node_modules"
+	],
 	"compilerOptions": {
 		"alwaysStrict": true,
 		"charset": "utf8",
@@ -9,26 +15,31 @@
 		"lib": [
 			"es2018"
 		],
-		"module": "CommonJS",
+		"module": "ESNext",
+		"moduleResolution": "NodeNext",
 		"noEmitOnError": true,
 		"noFallthroughCasesInSwitch": true,
 		"noImplicitAny": true,
 		"noImplicitReturns": true,
 		"noImplicitThis": true,
-		"noUnusedLocals": true,
-		"noUnusedParameters": true,
+//		"noUnusedLocals": true,
+//		"noUnusedParameters": true,
 		"resolveJsonModule": true,
 		"strict": true,
 		"strictNullChecks": true,
 		"strictPropertyInitialization": true,
 		"stripInternal": true,
 		"target": "ES2018",
-		"incremental": true
-	},
-	"include": [
-		"**/*.ts"
-	],
-	"exclude": [
-		"node_modules"
-	]
+		"incremental": true,
+		"types": [ "node" ],
+		"outDir": ".build/cdktf",
+		"forceConsistentCasingInFileNames": true,
+		"baseUrl": "src",
+		"paths": {
+			"lib/*":      [ "lib/*" ],
+			"provider/*": [ "../.build/cdktf/providers/*" ],
+			"stack/*":    [ "../.build/cdktf/stacks/*" ]
+		},
+		"allowSyntheticDefaultImports": true
+	}
 }

@@ -11,16 +11,13 @@
 
 # Npm
 node_modules/
-*.tsbuildinfo
 
 # Typescript
-src/**/*.js
-src/**/*.d.ts
-src/**/imported.ts
-
-# CDK
-cdktf.out/
-.gen/
+*.tsbuildinfo
+#*.d.ts
+!@types/**/*.d.ts
+*.js
 
 # Make
 .make/
+.build/*/

@@ -1,0 +1,24 @@
+= ECS Valheim Dedicated Server
+:description:           A CDK/TF IAC project to set up an on-demand Valheim dedicated server in ECS.
+:keywords:              IAC, AWS, ECS, CDK, CDKTF, Terraform, Docker, Valheim
+:author:                Peter Cummuskey
+:email:                 peterc@aetheric.co.nz
+:toc:                   macro
+:toclevels:             3
+:source-language:       typescript
+:source-highlighter:    highlight.js
+:highlightjs-languages: typescript
+
+{description}
+
+toc::[]
+
+== Developer Notes
+* Adding [src]`import 'scope-extensions-js'` allows the following methods:
+
+[%header,cols=">1h,^1,^1"]
+|===
+| returns | argument | context
+|  result |   let    |   run
+|    this |   also   |  apply
+|===
