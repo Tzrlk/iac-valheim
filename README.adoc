@@ -1,0 +1,20 @@
+= ECS Valheim Dedicated Server
+:description:           A CDK/TF IAC project to set up an on-demand Valheim dedicated server in ECS.
+:keywords:              IAC, AWS, ECS, Terraform, Docker, Valheim
+:author:                Peter Cummuskey
+:email:                 peterc@aetheric.co.nz
+:toc:                   macro
+:toclevels:             3
+:source-language:       terraform
+:source-highlighter:    highlight.js
+:highlightjs-languages: terraform
+
+{description}
+
+toc::[]
+
+== TODO
+
+- [ ] Need to de-sensitise the ECS task config.
+- [ ] Compile task config into module?
+- [ ] Need to properly wire-up docker build.

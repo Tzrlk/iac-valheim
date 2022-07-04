@@ -32,7 +32,7 @@ locals {
 			provider    = "freedns"
 			domain      = "jumpingcrab.com"
 			host        = "vikongs"
-			token       = "2tuXUBhXKexACEfMZKKBjuy8"
+			token       = var.DynDnsPass
 			ip_version  = "ipv4"
 		}]
 	}
