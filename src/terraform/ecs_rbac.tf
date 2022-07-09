@@ -24,7 +24,7 @@ resource "aws_iam_role" "ValheimExec" {
 	assume_role_policy = data.aws_iam_policy_document.EcsTrust.json
 	managed_policy_arns = [
 		aws_iam_policy.AmazonECSTaskExecutionRolePolicy.arn,
-		aws_iam_policy.ServerPassAccess.arn,
+		aws_iam_policy.PasswordAccess.arn,
 		aws_iam_policy.SsmAccess.arn,
 		aws_iam_policy.ValheimS3.arn,
 		aws_iam_policy.ValheimLogs.arn,
@@ -38,7 +38,7 @@ resource "aws_iam_role" "ValheimExec" {
 resource "aws_iam_role" "ValheimTask" {
 	assume_role_policy = data.aws_iam_policy_document.EcsTrust.json
 	managed_policy_arns = [
-		aws_iam_policy.ServerPassAccess.arn,
+		aws_iam_policy.PasswordAccess.arn,
 		aws_iam_policy.SsmAccess.arn,
 		aws_iam_policy.ValheimS3.arn,
 		aws_iam_policy.ValheimLogs.arn,

@@ -1,33 +1,34 @@
 # Secret management
 
 ## SERVER PASS #################################################################
-variable "ServerPass" {
-	description = "The password for the Valheim server."
-	type        = string
-	sensitive   = true
+locals {
+	Passwords = toset([
+		"Valheim",
+		"DnsUpdater",
+	])
 }
-resource "aws_secretsmanager_secret" "ServerPass" {
-	name_prefix = "valheim-server-pass"
+resource "aws_secretsmanager_secret" "Password" {
+	for_each = local.Passwords
+
+	name_prefix = "auth-pass-${lower(each.key)}-"
 	tags = {
 		Cost = "Cheap"
 	}
 }
-resource "aws_secretsmanager_secret_version" "ServerPass" {
-	lifecycle { ignore_changes = [ version_stages ] }
-	secret_id = aws_secretsmanager_secret.ServerPass.arn
-	secret_string = var.ServerPass
-}
 
 ## RBAC ########################################################################
-data "aws_iam_policy_document" "ServerPassAccess" {
+data "aws_iam_policy_document" "PasswordAccess" {
 	statement {
 		actions   = [ "secretsmanager:GetSecretValue" ]
-		resources = [ aws_secretsmanager_secret.ServerPass.arn ]
+		resources = [
+			for key in local.Passwords :
+				aws_secretsmanager_secret.Password[key].arn
+		]
 	}
 }
-resource "aws_iam_policy" "ServerPassAccess" {
+resource "aws_iam_policy" "PasswordAccess" {
 	name   = "secrets-access"
-	policy = data.aws_iam_policy_document.ServerPassAccess.json
+	policy = data.aws_iam_policy_document.PasswordAccess.json
 	tags = {
 		Cost = "Free"
 	}

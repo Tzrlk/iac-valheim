@@ -8,9 +8,17 @@ terraform {
 			source  = "kreuzwerker/docker"
 			version = "~> 2.16"
 		}
+		external = {
+			source  = "hashicorp/external"
+			version = "~> 2.2.2"
+		}
 		http = {
-			source = "hashicorp/http"
+			source  = "hashicorp/http"
 			version = "~> 2.1"
+		}
+		local = {
+			source  = "hashicorp/local"
+			version = "~> 2.2.3"
 		}
 	}
 }
