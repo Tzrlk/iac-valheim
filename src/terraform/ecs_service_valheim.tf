@@ -7,15 +7,8 @@ variable "AdminList" {
 }
 
 # Build and upload the image to the registry.
-resource "docker_registry_image" "Valheim" {
+data "docker_registry_image" "Valheim" {
 	name = "tzrlk/valheim-server:latest"
-	build {
-		context    = abspath("${path.module}/../docker")
-		dockerfile = abspath("${path.module}/../docker/Dockerfile")
-		build_args = {
-			S3_URL = "s3://${aws_s3_bucket.Valheim.id}"
-		}
-	}
 }
 
 variable "ServerPass" {
@@ -33,7 +26,7 @@ resource "aws_secretsmanager_secret_version" "ServerPass" {
 locals {
 	ContainerValheim = merge(local.ContainerDefaults, {
 		name         = "valheim"
-		image        = docker_registry_image.Valheim.sha256_digest
+		image        = data.docker_registry_image.Valheim.sha256_digest
 		essential    = true
 		cpu          = 1000 * local.TaskResFactors.Cpu
 		memory       = 1000 * local.TaskResFactors.Mem
@@ -76,7 +69,7 @@ locals {
 		})
 		healthCheck = merge(local.ContainerDefaults.healthCheck, {
 			command     = [ "CMD-SHELL", "/healthcheck.sh" ]
-			startPeriod = 500
+			startPeriod = 300
 		})
 	})
 }

@@ -1,6 +1,9 @@
 # Triggering terraform in various circumstances.
 
 ROOT ?= ..
+BUILD_DIR := ${ROOT}/.build
+include ${BUILD_DIR}/config.mk
+include ${BUILD_DIR}/docker.mk
 
 .PRECIOUS: \
 	${TF_DIR}/terraform.tfstate
@@ -27,6 +30,7 @@ plan: ${TF_DIR}/terraform.tfplan
 ${TF_DIR}/terraform.tfplan: \
 		TF_SOURCES \
 		TF_CONFIGS \
+		${BUILD_DIR}/docker/image \
 		${TF_DIR}/.terraform.lock.hcl \
 		| ${TF_DIR}/.terraform/
 	cd ${TF_DIR} && \

@@ -1,6 +1,8 @@
 # Reporting on and controlling the ECS task
 
 ROOT ?= ..
+BUILD_DIR := ${ROOT}/.build
+include ${BUILD_DIR}/config.mk
 
 .SECONDARY: \
 	${TASK_DIR}/svc_arn.txt \
@@ -12,7 +14,6 @@ ROOT ?= ..
 	${TASK_DIR}/eni.txt \
 	${TASK_DIR}/public_ip.txt \
 	${TASK_DIR}/public_dns.txt
-.ALWAYS:
 
 CLUSTER := valheim
 CONTAINER := valheim
