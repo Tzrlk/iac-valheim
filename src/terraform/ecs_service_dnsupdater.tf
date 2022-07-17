@@ -31,7 +31,9 @@ resource "aws_secretsmanager_secret_version" "DnsUpdater" {
 locals {
 	ContainerDns = merge(local.ContainerDefaults, {
 		name        = "dnsupdater"
-		image       = data.docker_registry_image.DnsUpdater.sha256_digest
+		image        = format("%s@%s",
+			data.docker_registry_image.DnsUpdater.name,
+			data.docker_registry_image.DnsUpdater.sha256_digest)
 		cpu         = 24 * local.TaskResFactors.Cpu
 		memory      = 24 * local.TaskResFactors.Mem
 		environment = concat(local.ContainerDefaults.environment, [

@@ -5,6 +5,8 @@ BUILD_DIR := ${ROOT}/.build
 include ${BUILD_DIR}/config.mk
 
 DOCKER_DIR := ${ROOT}/src/docker
+DOCKER_IMAGE_NAME := tzrlk/valheim-server
+DOCKER_IMAGE_TAG  := latest
 
 ${BUILD_DIR}/docker/:
 	mkdir -p ${@}
@@ -19,8 +21,13 @@ ${BUILD_DIR}/docker/image: \
 	docker build \
 		--iidfile ${@} \
 		--build-arg S3_URL=${VH_S3_URL} \
-		--tag tzrlk/valheim-server:latest \
+		--tag ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG} \
 		${DOCKER_DIR}/
+
+push: ${BUILD_DIR}/docker/pushed
+${BUILD_DIR}/docker/pushed: \
+		${BUILD_DIR}/docker/image
+	docker push ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}@$(file < ${<})
 
 # Logs-in to ECR
 ecr:

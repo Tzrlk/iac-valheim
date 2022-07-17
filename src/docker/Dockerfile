@@ -37,10 +37,15 @@ COPY --chmod=755 --link \
 	bin/s3_save.sh \
 	${HOOKS_DIR}/
 
-# Set up additional supervisor config
+# Tweak ip address config.
 COPY --link \
 	etc/no_ipv6.conf \
 	/etc/sysctl.d/
+
+# Set up additional supervisor config
+COPY --link \
+	etc/super_tails.conf \
+	/usr/local/etc/supervisor/conf.d/
 
 # Copy and define health check script
 COPY --chmod=755 --link \
@@ -53,9 +58,3 @@ HEALTHCHECK --start-period=120s \
 ENV \
 	BACKUPS_DIR=/config/backups \
 	WORLDS_DIR=/config/worlds
-
-# Define S3 locations
-ARG S3_URL
-ENV \
-	S3_URL_BAK=${S3_URL}/backups \
-	S3_URL_CFG=${S3_URL}/worlds

@@ -30,7 +30,7 @@ plan: ${TF_DIR}/terraform.tfplan
 ${TF_DIR}/terraform.tfplan: \
 		TF_SOURCES \
 		TF_CONFIGS \
-		${BUILD_DIR}/docker/image \
+		${BUILD_DIR}/docker/pushed \
 		${TF_DIR}/.terraform.lock.hcl \
 		| ${TF_DIR}/.terraform/
 	cd ${TF_DIR} && \

@@ -26,7 +26,9 @@ resource "aws_secretsmanager_secret_version" "ServerPass" {
 locals {
 	ContainerValheim = merge(local.ContainerDefaults, {
 		name         = "valheim"
-		image        = data.docker_registry_image.Valheim.sha256_digest
+		image        = format("%s@%s",
+			data.docker_registry_image.Valheim.name,
+			data.docker_registry_image.Valheim.sha256_digest)
 		essential    = true
 		cpu          = 1000 * local.TaskResFactors.Cpu
 		memory       = 1000 * local.TaskResFactors.Mem
@@ -44,6 +46,9 @@ locals {
 			{ name = "ADMINLIST_IDS",        value = join(" ", var.AdminList) },
 			{ name = "DNS_1",                value = "10.0.0.2" },
 			{ name = "DNS_2",                value = "10.0.0.2" },
+			{ name = "S3_URL",               value = "s3://${aws_s3_bucket.Valheim.id}" },
+			{ name = "S3_URL_CFG",           value = "s3://${aws_s3_bucket.Valheim.id}/worlds" },
+			{ name = "S3_URL_BAK",           value = "s3://${aws_s3_bucket.Valheim.id}/backups" },
 		])
 		secrets = [{
 			name      = "SERVER_PASS"

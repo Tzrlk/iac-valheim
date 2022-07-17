@@ -11,6 +11,9 @@ terraform.tfplan*
 *.tfvars
 *.backup
 
+# Docker
+/src/docker-compose.yml
+
 # Npm
 node_modules/
 *.tsbuildinfo

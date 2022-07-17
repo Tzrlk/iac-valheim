@@ -1,13 +1,16 @@
 #!/usr/bin/env bash
 set -eo pipefail
 
-logfile=hooks-$(date +%y%m%d).log
+if [ -z "${S3_URL_BAK}" ]; then
+	echo >&2 'S3_URL_BAK not set. Skipping S3 backup.'
+	exit 0
+fi
 
-echo "${0}: BACKUPS_DIR=${BACKUPS_DIR}" >> ${logfile}
-echo "${0}: S3_URL_BAK=${S3_URL_BAK}" >> ${logfile}
+echo >&2 "${0}: BACKUPS_DIR=${BACKUPS_DIR}"
+echo >&2 "${0}: S3_URL_BAK=${S3_URL_BAK}"
 
-echo "${0}: Starting backup." >> ${logfile}
+echo >&2 "${0}: Starting backup."
 aws s3 sync "${BACKUPS_DIR}" "${S3_URL_BAK}" \
 	--storage-class ONEZONE_IA
 
-echo "${0}: Backup complete." >> ${logfile}
+echo >&2 "${0}: Backup complete."
