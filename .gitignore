@@ -6,6 +6,8 @@
 
 # Terraform
 .terraform/
+terraform.drift.json
+terraform.tfplan*
 *.tfvars
 *.backup
 

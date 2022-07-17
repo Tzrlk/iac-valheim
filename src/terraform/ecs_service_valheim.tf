@@ -10,7 +10,8 @@ variable "AdminList" {
 resource "docker_registry_image" "Valheim" {
 	name = "tzrlk/valheim-server:latest"
 	build {
-		context = abspath("${path.module}/../docker")
+		context    = abspath("${path.module}/../docker")
+		dockerfile = abspath("${path.module}/../docker/Dockerfile")
 		build_args = {
 			S3_URL = "s3://${aws_s3_bucket.Valheim.id}"
 		}
