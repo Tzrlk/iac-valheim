@@ -27,7 +27,7 @@ ${BUILD_DIR}/docker/image: \
 push: ${BUILD_DIR}/docker/pushed
 ${BUILD_DIR}/docker/pushed: \
 		${BUILD_DIR}/docker/image
-	docker push ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}@$(file < ${<})
+	docker push ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}
 
 # Logs-in to ECR
 ecr:

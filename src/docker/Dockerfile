@@ -42,11 +42,6 @@ COPY --link \
 	etc/no_ipv6.conf \
 	/etc/sysctl.d/
 
-# Set up additional supervisor config
-COPY --link \
-	etc/super_tails.conf \
-	/usr/local/etc/supervisor/conf.d/
-
 # Copy and define health check script
 COPY --chmod=755 --link \
 	bin/healthcheck.sh \

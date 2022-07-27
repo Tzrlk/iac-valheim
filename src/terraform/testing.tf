@@ -4,11 +4,15 @@ resource "local_file" "DockerCompose" {
 	filename = "${path.module}/../docker-compose.yml"
 	content  = yamlencode({
 		version  = "3.2"
+		name     = "iac-valheim"
 		services = {
 
 			valheim = {
 				container_name = local.ContainerValheim["name"]
 				image          = local.ContainerValheim["image"]
+				build          = {
+					context = "docker"
+				}
 				volumes        = [ "~/.aws/:/root/.aws:ro" ]
 				ports = [
 					for item in local.ContainerValheim["portMappings"] :
