@@ -13,8 +13,10 @@
 
 toc::[]
 
+== Notes
+
 == TODO
 
 - [ ] Need to de-sensitise the ECS task config.
-- [ ] Compile task config into module?
-- [ ] Need to properly wire-up docker build.
+- [x] Compile task config into module?
+- [x] Need to properly wire-up docker build.

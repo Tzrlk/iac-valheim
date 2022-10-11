@@ -1,0 +1,35 @@
+root = true
+
+[*]
+charset                  = utf-8
+end_of_line              = lf
+trim_trailing_whitespace = true
+insert_final_newline     = true
+max_line_length          = 120
+indent_style             = tab
+tab_width                = 4
+
+[*] # IntelliJ extensions
+ij_any_align_consecutive_assignments           = true
+ij_any_align_multiline_chained_methods         = true
+ij_any_align_consecutive_variable_declarations = true
+ij_any_align_group_field_declarations          = true
+ij_smart_tabs                                  = true
+ij_visual_guides                               = 80, 120
+ij_vtl_tab_width                               = 2
+ij_continuation_indent_size                    = 8
+ij_any_keep_indents_on_empty_lines             = false
+ij_shell_redirect_followed_by_space            = true
+ij_shell_switch_cases_indented                 = true
+ij_shell_keep_column_alignment_padding         = true
+ij_any_align_multiline_assignment              = true
+ij_any_align_multiline_binary_operation        = true
+ij_yaml_align_values_properties                = on_value
+
+[*.{y,ya}ml]
+indent_style = space
+indent_size  = 2
+
+[*.py]
+indent_style = space
+indent_size  = 4

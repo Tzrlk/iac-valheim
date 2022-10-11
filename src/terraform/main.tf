@@ -35,3 +35,20 @@ provider "aws" {
 provider "docker" {
 	host = "tcp://localhost:2375"
 }
+
+module "ValheimServerAws" {
+	source  = "tzrlk/valheim-server/aws"
+	version = "0.1.0"
+
+	world_name = "Bunnings"
+
+	server_name     = "Bunnings"
+	server_pass     = var.ServerPass
+	server_timezone = "Pacific/Auckland"
+
+	freedns_host  = "vikongs"
+	freedns_token = var.DnsUpdaterToken
+}
+
+variable "ServerPass" {}
+variable "DnsUpdaterToken" {}
