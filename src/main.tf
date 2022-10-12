@@ -37,8 +37,9 @@ provider "docker" {
 }
 
 module "ValheimServerAws" {
-	source  = "tzrlk/valheim-server/aws"
-	version = "0.1.0"
+	source  = "../../terraform-aws-valheim-server"
+#	source  = "tzrlk/valheim-server/aws"
+#	version = "0.1.0"
 
 	world_name = "Bunnings"
 

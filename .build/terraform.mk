@@ -3,14 +3,13 @@
 ROOT ?= ..
 BUILD_DIR := ${ROOT}/.build
 include ${BUILD_DIR}/config.mk
-include ${BUILD_DIR}/docker.mk
 
 .PRECIOUS: \
 	${TF_DIR}/terraform.tfstate
 
-TF_DIR := ${ROOT}/src/terraform
+TF_DIR := ${ROOT}/src
 
-TF_SOURCES: $(wildcard ${ROOT}/src/terraform/*.tf)
+TF_SOURCES: $(wildcard ${TF_DIR}/*.tf)
 TF_CONFIGS: $(wildcard ${TF_DIR}/*.tfvars)
 
 #: Runs terraform to make aws match the desired config.
@@ -30,7 +29,6 @@ plan: ${TF_DIR}/terraform.tfplan
 ${TF_DIR}/terraform.tfplan: \
 		TF_SOURCES \
 		TF_CONFIGS \
-		${BUILD_DIR}/docker/pushed \
 		${TF_DIR}/.terraform.lock.hcl \
 		| ${TF_DIR}/.terraform/
 	cd ${TF_DIR} && \
@@ -41,9 +39,10 @@ ${TF_DIR}/terraform.tfplan: \
 ${TF_DIR}/.terraform/: \
 		${TF_DIR}/.terraform.lock.hcl
 
-# Initialise (and upgrade) required providers, modules, etc.
+#: Initialise (and upgrade) required providers, modules, etc.
+init: ${TF_DIR}/.terraform.lock.hcl
 ${TF_DIR}/.terraform.lock.hcl: \
-		${TF_DIR}/_main.tf # provider config
+		${TF_DIR}/main.tf # provider config
 	cd ${TF_DIR} && \
 	terraform init \
 			-upgrade
