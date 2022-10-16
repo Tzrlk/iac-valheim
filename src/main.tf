@@ -37,19 +37,32 @@ provider "docker" {
 }
 
 module "ValheimServerAws" {
-	source  = "../../terraform-aws-valheim-server"
-#	source  = "tzrlk/valheim-server/aws"
-#	version = "0.1.0"
+	source  = "tzrlk/valheim-server/aws"
+	version = "0.1.1"
 
 	world_name = "Bunnings"
 
-	server_name     = "Bunnings"
 	server_pass     = var.ServerPass
 	server_timezone = "Pacific/Auckland"
+	server_admins   = []
 
-	freedns_host  = "vikongs"
-	freedns_token = var.DnsUpdaterToken
+	freedns_host   = "vikongs"
+	freedns_domain = "jumpingcrab.com"
+	freedns_token  = var.DnsUpdaterToken
+
+	enable_server = var.EnableServer
+	enable_spot   = true
+
 }
 
-variable "ServerPass" {}
-variable "DnsUpdaterToken" {}
+variable "EnableServer" {
+	type = bool
+}
+variable "ServerPass" {
+	type      = string
+	sensitive = true
+}
+variable "DnsUpdaterToken" {
+	type      = string
+	sensitive = true
+}
